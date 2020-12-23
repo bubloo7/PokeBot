@@ -28,6 +28,10 @@ class PokeBot(Player):
         wisp = Move("willowisp")
         web = Move("stickyweb")
 
+        # protect_last should be made False at the start of every battle
+        if battle.turn == 1:
+            self.protect_last = False
+
         # Statuses the bot checks for
         faint1 = Status(2)
         toxic2 = Status(7)
@@ -70,9 +74,7 @@ class PokeBot(Player):
                     self.protect_last = False
 
             # checks if the opponent's pokemon doesn't have another status
-            if m.id==glare.id and not(battle.opponent_active_pokemon.status!=None and
-                                      battle.opponent_active_pokemon.status!=2 and
-                                      battle.opponent_active_pokemon.status!=faint1):
+            if m.id==glare.id and battle.opponent_active_pokemon.status==None:
                 immune = False
                 # checks if the enemy pokemon is immune
                 for type in battle.opponent_active_pokemon.types:
@@ -83,9 +85,7 @@ class PokeBot(Player):
                     return self.create_order(m)
 
             # checks if the opponent's pokemon doesn't have another status
-            if m.id==twave.id and not(battle.opponent_active_pokemon.status!=None and
-                                      battle.opponent_active_pokemon.status!=2 and
-                                      battle.opponent_active_pokemon.status!=faint1):
+            if m.id==twave.id and battle.opponent_active_pokemon.status==None:
                 immune = False
                 # checks if the enemy pokemon is immune
                 for type in battle.opponent_active_pokemon.types:
@@ -96,9 +96,7 @@ class PokeBot(Player):
                     return self.create_order(m)
 
             # checks if the opponent's pokemon doesn't have another status
-            if m.id==toxic.id and not(battle.opponent_active_pokemon.status!=None and
-                                      battle.opponent_active_pokemon.status!=2 and
-                                      battle.opponent_active_pokemon.status!=faint1):
+            if m.id==toxic.id and battle.opponent_active_pokemon.status==None:
                 immune = False
                 species = battle.active_pokemon.species
 
@@ -112,7 +110,7 @@ class PokeBot(Player):
                     return self.create_order(m)
 
             # checks if the opponent's pokemon doesn't have another status
-            if m.id==wisp.id and not(battle.active_pokemon.status!=None and battle.active_pokemon.status!=2 and battle.active_pokemon.status!=faint1):
+            if m.id==wisp.id and battle.active_pokemon.status==None:
                 immune = False
                 # checks if the opponent is immune
                 for type in battle.opponent_active_pokemon.types:
