@@ -1,3 +1,6 @@
+# use this file to challenge the bot on the official showdown server.
+# make sure you have PokeBot downloaded and poke-env in the virtual environment
+
 from PokeBot import PokeBot
 from poke_env.player_configuration import PlayerConfiguration
 from poke_env.server_configuration import ShowdownServerConfiguration
