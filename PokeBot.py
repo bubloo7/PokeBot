@@ -129,30 +129,8 @@ class PokeBot(Player):
                         return self.create_order(m)
 
         # switches to a new pokemon if the active pokemon fainted or has a debuffed attack or special attack stat
-        if battle.active_pokemon.fainted or battle.active_pokemon.boosts["atk"]== -2  or battle.active_pokemon.boosts["spa"]== -2:
-            index2 = 0
-            max2 = 0
-
-            # Switches to a pokemon with an effective typing
-            for i in range(len(battle.available_switches)):
-                if battle.opponent_active_pokemon.damage_multiplier(battle.available_switches[i].type_1) > max2:
-                    index2 = i
-                    max2 = battle.opponent_active_pokemon.damage_multiplier(battle.available_switches[i].type_1)
-                if battle.opponent_active_pokemon.damage_multiplier(battle.available_switches[i].type_2) > max2:
-                    index2 = i
-                    max2 = battle.opponent_active_pokemon.damage_multiplier(battle.available_switches[i].type_2)
-
-            # If no pokemon has an effective typing, it switches into a pokemon that resists
-            if max2 <= 1:
-                max2 = 4
-                index2 = 0
-                for i in range(len(battle.available_switches)):
-                    if battle.available_switches[i].damage_multiplier(battle.opponent_active_pokemon.type_1)<max2:
-                        index2 = i
-                        max2 = battle.available_switches[i].damage_multiplier(battle.opponent_active_pokemon.type_1)
-            if len(battle.available_switches) != 0:
-
-                return self.create_order(battle.available_switches[index2])
+        if (battle.active_pokemon.fainted or battle.active_pokemon.boosts["atk"]<= -2  or battle.active_pokemon.boosts["spa"]<= -2) and len(battle.available_switches)>0:
+            return switch(self,battle)
 
         if battle.available_moves:
 
@@ -163,7 +141,6 @@ class PokeBot(Player):
 
                 # damage calculations are found using the damageCalc helper method
                 damages[i] = damageCalc(battle.active_pokemon,battle.opponent_active_pokemon, battle.available_moves[i], battle.weather, battle.fields)
-            #    print(damages[i])
             index = 0
             max = 0
             # finds the move that deals the most damage
@@ -179,8 +156,12 @@ class PokeBot(Player):
             else:
                 return self.create_order(battle.available_moves[index])
 
+        # no moves available so switch
+        elif(len(battle.available_switches)!=0):
+            return switch(self,battle)
         else:
             return self.choose_random_move(battle)
+
 
 
 # used to find the move that deals the most damage
@@ -268,3 +249,29 @@ def damageCalc(my_poke, opp_poke, move,weather,terrain):
                 damage*=.5
 
     return damage
+
+# used to decide what pokemon to switch into
+def switch(player, battle):
+    index2 = 0
+    max2 = 0
+
+    # Switches to a pokemon with an effective typing
+    for i in range(len(battle.available_switches)):
+        if battle.opponent_active_pokemon.damage_multiplier(battle.available_switches[i].type_1) > max2:
+            index2 = i
+            max2 = battle.opponent_active_pokemon.damage_multiplier(battle.available_switches[i].type_1)
+        if battle.opponent_active_pokemon.damage_multiplier(battle.available_switches[i].type_2) > max2:
+            index2 = i
+            max2 = battle.opponent_active_pokemon.damage_multiplier(battle.available_switches[i].type_2)
+
+    # If no pokemon has an effective typing, it switches into a pokemon that resists
+    if max2 <= 1:
+        max2 = 4
+        index2 = 0
+        for i in range(len(battle.available_switches)):
+            if battle.available_switches[i].damage_multiplier(battle.opponent_active_pokemon.type_1) < max2:
+                index2 = i
+                max2 = battle.available_switches[i].damage_multiplier(battle.opponent_active_pokemon.type_1)
+    if len(battle.available_switches) != 0:
+        return player.create_order(battle.available_switches[index2])
+
