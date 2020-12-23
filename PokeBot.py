@@ -27,10 +27,9 @@ class PokeBot(Player):
         toxic = Move("toxic")
         wisp = Move("willowisp")
         web = Move("stickyweb")
+        bbunker = Move("banefulbunker")
+        spikyshield = Move("spikyshield")
 
-        # protect_last should be made False at the start of every battle
-        if battle.turn == 1:
-            self.protect_last = False
 
         # Statuses the bot checks for
         faint1 = Status(2)
@@ -42,84 +41,92 @@ class PokeBot(Player):
         #stats of the bots active pokemon
         mystat = battle.active_pokemon.base_stats
 
-        #used to find how big the enemy pokemon is
+        #used to find how many pokemon the enemy has
         self.eteam_size = 6
         for enemy in battle.opponent_team:
             if battle.opponent_team[enemy].status== 2 or battle.opponent_team[enemy].status == faint1:
                 self.eteam_size-=1
 
-        # Checks if the active pokemon has certain non damaging moves and uses them if conditions are met
-        for m in battle.available_moves:
-           # print(str(m)+" : " + str(m.id))
+        # protect_last should be made False at the start of every battle
+        if battle.turn == 1:
+            self.protect_last = False
 
-            # use sticky web if the opponent has more than 4 pokemon alive
-            if m.id == web.id and self.eteam_size>=4:
-                print(battle.battle_tag)
-                immune = False
-                # checks if opponent already has sticky web
-                for condition in battle.opponent_side_conditions:
-                    if condition == SideCondition.STICKY_WEB:
-                        immune = True
-                if not immune:
-                 return self.create_order(m)
+        # checks if the enemy pokemon is dynamaxed
+        if battle.dynamax_turns_left == None:
 
-            # uses protect if the opponent's active pokemon is badly poisoned
-            if m.id==protect.id and (battle.opponent_active_pokemon.status==toxic2 or
-                                     battle.opponent_active_pokemon.status==7):
-                # checks if the active pokemon didn't use it last turn
-                if self.protect_last == False:
-                    self.protect_last = True
-                    return self.create_order(m)
-                else:
-                    self.protect_last = False
+            # Checks if the active pokemon has certain non damaging moves and uses them if conditions are met
+            for m in battle.available_moves:
+               # print(str(m)+" : " + str(m.id))
 
-            # checks if the opponent's pokemon doesn't have another status
-            if m.id==glare.id and battle.opponent_active_pokemon.status==None:
-                immune = False
-                # checks if the enemy pokemon is immune
-                for type in battle.opponent_active_pokemon.types:
-                    if type == PokemonType.ELECTRIC:
-                        immune = True
-                # uses glare if the opponent not immune and is faster than the active pokemon
-                if not immune and estat["spe"]>=mystat["spe"]:
-                    return self.create_order(m)
+                # use sticky web if the opponent has more than 4 pokemon alive
+                if m.id == web.id and self.eteam_size>=4:
+                    print(battle.battle_tag)
+                    immune = False
+                    # checks if opponent already has sticky web
+                    for condition in battle.opponent_side_conditions:
+                        if condition == SideCondition.STICKY_WEB:
+                            immune = True
+                    if not immune:
+                     return self.create_order(m)
 
-            # checks if the opponent's pokemon doesn't have another status
-            if m.id==twave.id and battle.opponent_active_pokemon.status==None:
-                immune = False
-                # checks if the enemy pokemon is immune
-                for type in battle.opponent_active_pokemon.types:
-                    if type == PokemonType.ELECTRIC or type == PokemonType.GROUND:
-                        immune = True
-                # uses thunder wave if the opponent is not immune and is faster than the active pokemon
-                if not immune and estat["spe"] >= mystat["spe"]:
-                    return self.create_order(m)
+                # uses protect if the opponent's active pokemon is badly poisoned
+                if (m.id==protect.id or m.id == spikyshield.id or m.id == bbunker.id) \
+                        and (battle.opponent_active_pokemon.status==toxic2 or
+                                         battle.opponent_active_pokemon.status==7):
+                    # checks if the active pokemon didn't use it last turn
+                    if self.protect_last == False:
+                        self.protect_last = True
+                        return self.create_order(m)
+                    else:
+                        self.protect_last = False
 
-            # checks if the opponent's pokemon doesn't have another status
-            if m.id==toxic.id and battle.opponent_active_pokemon.status==None:
-                immune = False
-                species = battle.active_pokemon.species
+                # checks if the opponent's pokemon doesn't have another status
+                if m.id==glare.id and battle.opponent_active_pokemon.status==None:
+                    immune = False
+                    # checks if the enemy pokemon is immune
+                    for type in battle.opponent_active_pokemon.types:
+                        if type == PokemonType.ELECTRIC:
+                            immune = True
+                    # uses glare if the opponent not immune and is faster than the active pokemon
+                    if not immune and estat["spe"]>=mystat["spe"]:
+                        return self.create_order(m)
 
-                # checks if the opponent's pokemon is immune
-                for type in battle.opponent_active_pokemon.types:
-                    if type == PokemonType.POISON or type == PokemonType.STEEL:
-                        immune = True
+                # checks if the opponent's pokemon doesn't have another status
+                if m.id==twave.id and battle.opponent_active_pokemon.status==None:
+                    immune = False
+                    # checks if the enemy pokemon is immune
+                    for type in battle.opponent_active_pokemon.types:
+                        if type == PokemonType.ELECTRIC or type == PokemonType.GROUND:
+                            immune = True
+                    # uses thunder wave if the opponent is not immune and is faster than the active pokemon
+                    if not immune and estat["spe"] >= mystat["spe"]:
+                        return self.create_order(m)
 
-                # uses toxic if the enemy is not immune or if the active pokemon is salazzle (which has corrosion)
-                if ((not immune) or (species.lower=="salazzle")):
-                    return self.create_order(m)
+                # checks if the opponent's pokemon doesn't have another status
+                if m.id==toxic.id and battle.opponent_active_pokemon.status==None:
+                    immune = False
+                    species = battle.active_pokemon.species
 
-            # checks if the opponent's pokemon doesn't have another status
-            if m.id==wisp.id and battle.active_pokemon.status==None:
-                immune = False
-                # checks if the opponent is immune
-                for type in battle.opponent_active_pokemon.types:
-                    if type == PokemonType.FIRE:
-                        immune = True
+                    # checks if the opponent's pokemon is immune
+                    for type in battle.opponent_active_pokemon.types:
+                        if type == PokemonType.POISON or type == PokemonType.STEEL:
+                            immune = True
 
-                # uses wil o wisp if the enemy isn't immmune and is a physical attacker
-                if not immune and estat["atk"] >= mystat["spa"]:
-                    return self.create_order(m)
+                    # uses toxic if the enemy is not immune or if the active pokemon is salazzle (which has corrosion)
+                    if ((not immune) or (species.lower=="salazzle")):
+                        return self.create_order(m)
+
+                # checks if the opponent's pokemon doesn't have another status
+                if m.id==wisp.id and battle.active_pokemon.status==None:
+                    immune = False
+                    # checks if the opponent is immune
+                    for type in battle.opponent_active_pokemon.types:
+                        if type == PokemonType.FIRE:
+                            immune = True
+
+                    # uses wil o wisp if the enemy isn't immmune and is a physical attacker
+                    if not immune and estat["atk"] >= mystat["spa"]:
+                        return self.create_order(m)
 
         # switches to a new pokemon if the active pokemon fainted or has a debuffed attack or special attack stat
         if battle.active_pokemon.fainted or battle.active_pokemon.boosts["atk"]== -2  or battle.active_pokemon.boosts["spa"]== -2:
@@ -165,8 +172,15 @@ class PokeBot(Player):
                     max = damages[i]
                     index = i
 
-            # uses the move that deals no damage
-            return self.create_order(battle.available_moves[index])
+            if len(battle.available_switches) == 0 and battle._can_dynamax:
+                # uses the move that deals the most damage
+                return self.create_order(battle.available_moves[index],dynamax=True)
+
+            else:
+                return self.create_order(battle.available_moves[index])
+
+        else:
+            return self.choose_random_move(battle)
 
 
 # used to find the move that deals the most damage
