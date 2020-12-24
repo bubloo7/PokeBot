@@ -35,12 +35,12 @@ async def on_ready():
     # Feel free to change this value
     maxRating = 1000
 
+    player = PokeBot(
+        player_configuration=PlayerConfiguration(showdownUsername, showdownPassword),
+        server_configuration=ShowdownServerConfiguration, start_timer_on_battle_start=True
+    )
+
     while True:
-        # logs in and logs out after each game because sometimes showdown servers close
-        player = PokeBot(
-            player_configuration=PlayerConfiguration(showdownUsername, showdownPassword),
-            server_configuration=ShowdownServerConfiguration, start_timer_on_battle_start=True
-        )
         await player.ladder(1)
         # I use asyncio.sleep to avoid getting marked for spam
 
@@ -51,8 +51,8 @@ async def on_ready():
             print(player.battles[b])
             print(player.battles[b].rating)
             if player.battles[b].rating != None and player.battles[b].rating>maxRating:
-                botspam = client.get_channel(discordChannel)
-                await botspam.send("new record reached: " + str(player.battles[b].rating))
+                channel = client.get_channel(discordChannel)
+                await channel.send("new record reached: " + str(player.battles[b].rating))
                 maxRating = player.battles[b].rating
 
 
