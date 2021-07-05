@@ -46,8 +46,8 @@ class ScanBot(Player):
 
 async def main():
     # Insert the username and password of the bot
-    bot_name = "bubloo7"
-    bot_password = "Ani2akil"
+    bot_name = ""
+    bot_password = ""
 
     player =  ScanBot(
         player_configuration=PlayerConfiguration(bot_name,bot_password),
