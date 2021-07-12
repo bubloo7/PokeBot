@@ -30,12 +30,15 @@ class ScanBot(Player):
         # Stats of my Pokemon
         print("My level: ", battle.active_pokemon.level)
         print("My Stats: ", battle.active_pokemon.stats)
+        print("My Item: ", battle.active_pokemon.item)
+        print("My Ability: ", battle.active_pokemon.ability)
+
 
         # Stat boosts
         print("My Boosts: ", battle.active_pokemon.boosts)
         print("Enemy Boosts: ", battle.opponent_active_pokemon.boosts)
 
-        # Th field
+        # The fields
         print("Fields: ", battle.fields)
         print("Weather: ", battle.weather)
         print("My Side Conditions: ", battle.side_conditions)
