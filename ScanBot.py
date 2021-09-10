@@ -63,17 +63,19 @@ class ScanBot(Player):
 
 async def main():
     # Insert the username and password of the bot
-    bot_name = "bubloo8"
-    bot_password = "Ani2akil"
+    bot_name = ""
+    bot_password = ""
+    
+    # Insert your name here
+    your_name = ""
 
     player = ScanBot(
         player_configuration=PlayerConfiguration(bot_name, bot_password),
         server_configuration=ShowdownServerConfiguration, start_timer_on_battle_start=True
     )
 
-    # Makes the bot open to challenges so you can challenge it
-    # await player.ladder(5)
-    await player.send_challenges("stuppp", n_challenges=10)
+    # Makes the bot challenge you
+    await player.send_challenges(your_name, n_challenges=10)
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())
